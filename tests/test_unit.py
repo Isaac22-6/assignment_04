@@ -38,6 +38,12 @@ def test_parse_hours(text, hours):
     assert parse_hours(text) == pytest.approx(hours), f"parse_hours({text!r})"
 
 
+def test_parse_hours_handles_mixed_whitespace_and_minutes():
+    """Minutes may be given with or without a leading hour segment, and whitespace should be ignored."""
+    assert parse_hours("  1h  30m  ") == pytest.approx(1.5)
+    assert parse_hours("  30m ") == pytest.approx(0.5)
+
+
 @pytest.mark.parametrize("bad", ["", "   ", "forty", "8 hours", None, NAN])
 def test_parse_hours_never_crashes(bad):
     """Unreadable is zero, not a traceback. One bad cell must not take down payroll."""
