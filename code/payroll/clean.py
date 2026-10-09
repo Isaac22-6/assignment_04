@@ -80,6 +80,7 @@ def parse_hours(value) -> float:
 
     return hours
 
+
 def clean_currency(value) -> float:
     """Read a dollar amount as HR typed it; return it as a float.
 
@@ -100,16 +101,18 @@ def clean_currency(value) -> float:
     - You wrote this function in Assignment 02. It is the same function. That
       is not an accident — cleaning currency is something every pipeline does.
     """
-    
+    if pd.isna(value):
+        return 0.0
+    if not isinstance(value, str):
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return 0.0
 
-    if type(value) == int:
-        return float(value) 
-    elif value is None or pd.isna(value):
-        value = 0.0 
+    text = value.replace("$", "").replace(",", "").strip()
     try:
-        value = value.replace("$", "").replace(",", "").strip()
-        return float(value)
-    except (ValueError, AttributeError):
+        return float(text)
+    except ValueError:
         return 0.0
 
 
@@ -128,7 +131,6 @@ def add_hours_worked(timesheet: pd.DataFrame) -> pd.DataFrame:
     - `return out`. Three lines. Every pipeline step in this assignment has this
       shape: copy, add a column, return.
     """
-    
     out = timesheet.copy()
     out["hours_worked"] = out["hours"].apply(parse_hours)
     return out
@@ -143,9 +145,10 @@ def add_hourly_rate(employees: pd.DataFrame) -> pd.DataFrame:
     How to build it: the same three lines as `add_hours_worked`, with the other
     function and the other column names.
     """
-   
     employee_copy = employees.copy()
-    employee_copy["hourly_rate_usd"] = employee_copy["hourly_rate"].apply(clean_currency)
+    employee_copy["hourly_rate_usd"] = employee_copy["hourly_rate"].apply(
+        clean_currency
+    )
     return employee_copy
 
 
