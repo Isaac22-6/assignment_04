@@ -290,4 +290,7 @@ def test_app_recomputes_for_a_generated_week():
     assert shown.get("Employees paid") == "8", shown          # 9 rows, 1 unmatched
     assert shown.get("Total hours") == "158.25", shown
     assert shown.get("Total gross pay") == "$2,763.81", shown
-    assert app.warning and "E9" in app.warning[0].value
+    roster_ids = set(load_employees()["employee_id"])
+    unmatched_ids = set(week["employee_id"]) - roster_ids
+    assert len(unmatched_ids) == 1
+    assert app.warning and next(iter(unmatched_ids)) in app.warning[0].value

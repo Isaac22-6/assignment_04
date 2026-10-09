@@ -119,12 +119,15 @@ def payroll_export(payroll: pd.DataFrame) -> pd.DataFrame:
     view of it shaped for someone else's system.
     """
     export_df = payroll[payroll['pay_type'] != 'unmatched'].copy()
-    export_df = export_df[['payroll_date', 'employee_id', 'hours_worked', 'hourly_rate_usd', 'gross_pay']]
-    export_df = export_df.rename(columns={
-        'payroll_date': 'payrolldate',
-        'employee_id': 'employeeid',
-        'hours_worked': 'hours',
-        'hourly_rate_usd': 'rate',
-        'gross_pay': 'total'
+    export_df = export_df[
+        ['payroll_date', 'employee_id', 'hours_worked',
+         'hourly_rate_usd', 'gross_pay']
+    ]
+    export_df = pd.DataFrame({
+        'payrolldate': export_df['payroll_date'],
+        'employeeid': export_df['employee_id'],
+        'hours': export_df['hours_worked'],
+        'rate': export_df['hourly_rate_usd'],
+        'total': export_df['gross_pay']
     })
     return export_df
