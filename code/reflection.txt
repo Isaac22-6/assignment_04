@@ -4,5 +4,6 @@ include information about employees and the time they spent working into one tab
 by using the employee_id series that they both share as a key. I can practice understanding
 when to use right merge, left merge, or inner merge by asking myself the question
 I’m trying to answer. For example, if I want to find the number of missing names for employees who worked during the week,
-I would use a left merge for the merged_employees function in the join module. If I want to find out who specifically worked
-during the week, I would use a right merge for merged_employees.
+I would use a left join for the merged_employees function in the join module, to merge only the rows that match with rows in the timesheet dataframe. If I want to find out who 
+specifically worked during the week, I would use a right join for merged_employees
+to merge only the rows that match the rows in the employee dataframe.

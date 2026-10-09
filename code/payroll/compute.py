@@ -16,7 +16,7 @@ import pandas as pd
 from .clean import add_hourly_rate, add_hours_worked
 from .join import merge_employees
 
-OVERTIME_THRESHOLD = 40.0   # weekly hours above this are paid at time-and-a-half
+OVERTIME_THRESHOLD = 40.0  # weekly hours above this are paid at time-and-a-half
 OVERTIME_MULTIPLIER = 1.5
 
 
@@ -34,21 +34,19 @@ def calc_gross_pay(hours: float, rate: float) -> float:
         calc_gross_pay(0.75, 17.0)   ->  12.75
         calc_gross_pay(20.0, float("nan"))  ->  0.0
     """
-    
-    gross_pay = 0.0
     if pd.isna(rate):
         return 0.0
-    elif hours > OVERTIME_THRESHOLD:
-        extended_rate = (((hours - OVERTIME_THRESHOLD) * rate )* OVERTIME_MULTIPLIER)
-        hours = OVERTIME_THRESHOLD
-        gross_pay = (hours * rate) + extended_rate
+    if hours > OVERTIME_THRESHOLD:
+        overtime_hours = hours - OVERTIME_THRESHOLD
+        overtime_pay = overtime_hours * rate * OVERTIME_MULTIPLIER
+        gross_pay = OVERTIME_THRESHOLD * rate + overtime_pay
     else:
         gross_pay = hours * rate
     return round(gross_pay, 2)
 
 
 def classify_pay(hours: float, rate: float) -> str:
-    """One word the office manager can filter on: what kind of pay ro w is this?
+    """One word the office manager can filter on: what kind of pay row is this?
 
         "unmatched"   the rate is missing -> employee_id was not on the roster
         "overtime"    more than 40 hours
@@ -57,13 +55,11 @@ def classify_pay(hours: float, rate: float) -> str:
     Check for unmatched *first*: an unknown employee with 45 hours is still
     unmatched, not overtime.
     """
-   
     if pd.isna(rate):
         return "unmatched"
-    elif hours > OVERTIME_THRESHOLD:  
+    if hours > OVERTIME_THRESHOLD:
         return "overtime"
-    else:
-        return "regular"
+    return "regular"
 
 
 def add_gross_pay(payroll: pd.DataFrame) -> pd.DataFrame:
@@ -75,16 +71,21 @@ def add_gross_pay(payroll: pd.DataFrame) -> pd.DataFrame:
         lambda row: calc_gross_pay(row["hours_worked"], row["hourly_rate_usd"])
     """
     payroll_copy = payroll.copy()
-    payroll_copy['gross_pay'] = payroll_copy.apply(lambda row: calc_gross_pay(row['hours_worked'], row['hourly_rate_usd']), axis=1)
+    payroll_copy["gross_pay"] = payroll_copy.apply(
+        lambda row: calc_gross_pay(row["hours_worked"], row["hourly_rate_usd"]),
+        axis=1,
+    )
     return payroll_copy
 
 
 def add_pay_type(payroll: pd.DataFrame) -> pd.DataFrame:
     """Return a copy with one new column, `pay_type`: `classify_pay` for every row."""
     payroll_copy = payroll.copy()
-    payroll_copy['pay_type'] = payroll_copy.apply(lambda row: classify_pay(row['hours_worked'], row['hourly_rate_usd']), axis=1)
+    payroll_copy["pay_type"] = payroll_copy.apply(
+        lambda row: classify_pay(row["hours_worked"], row["hourly_rate_usd"]),
+        axis=1,
+    )
     return payroll_copy
-    
 
 
 def build_payroll(timesheet: pd.DataFrame, employees: pd.DataFrame) -> pd.DataFrame:
@@ -100,7 +101,6 @@ def build_payroll(timesheet: pd.DataFrame, employees: pd.DataFrame) -> pd.DataFr
     join_df = add_pay_type(join_df)
     return join_df
 
-    
 
 def payroll_export(payroll: pd.DataFrame) -> pd.DataFrame:
     """The file the online payroll provider imports — a NEW frame, not a renamed one.
@@ -118,16 +118,13 @@ def payroll_export(payroll: pd.DataFrame) -> pd.DataFrame:
     pipeline's columns. The pipeline table keeps its lineage; the export is a
     view of it shaped for someone else's system.
     """
-    export_df = payroll[payroll['pay_type'] != 'unmatched'].copy()
-    export_df = export_df[
-        ['payroll_date', 'employee_id', 'hours_worked',
-         'hourly_rate_usd', 'gross_pay']
-    ]
-    export_df = pd.DataFrame({
-        'payrolldate': export_df['payroll_date'],
-        'employeeid': export_df['employee_id'],
-        'hours': export_df['hours_worked'],
-        'rate': export_df['hourly_rate_usd'],
-        'total': export_df['gross_pay']
-    })
-    return export_df
+    payable = payroll[payroll["pay_type"] != "unmatched"]
+    return pd.DataFrame(
+        {
+            "payrolldate": payable["payroll_date"],
+            "employeeid": payable["employee_id"],
+            "hours": payable["hours_worked"],
+            "rate": payable["hourly_rate_usd"],
+            "total": payable["gross_pay"],
+        }
+    )
