@@ -4,12 +4,5 @@ streamlit>=1.56
 # The exact ruff GraderThan grades code style with — `ruff check` here matches the grade.
 ruff==0.16.9
 
-I learned how to merge two dataframes to combine different series within one table.
-In the join module, I was able to merge the timesheet and employees dataframes to
-include information about employees and the time they spent working into one table
-by using the employee_id series that they both share as a key. I can practice understanding
-when to use right merge, left merge, or inner merge by asking myself the question
-I’m trying to answer. For example, if I want to find the number of missing names for employees who worked during the week,
-I would use a left merge for the merged_employees function in the join module. If I want to find out who specifically worked
-during the week, I would use a right merge for merged_employees.
+
 
