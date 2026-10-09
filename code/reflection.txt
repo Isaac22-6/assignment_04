@@ -5,5 +5,5 @@ by using the employee_id series that they both share as a key. I can practice un
 when to use right merge, left merge, or inner merge by asking myself the question
 I’m trying to answer. For example, if I want to find the number of missing names for employees who worked during the week,
 I would use a left join for the merged_employees function in the join module, to show all rows in the timesheet dataframe and only matching rows from
-the employee dataframe. If I want to find out who specifically worked during the week, I would use a right join for merged_employees
+the employee dataframe. If I want to the specific amount of hours each employee with their name on the roster worked, I would use a right join for merged_employees
 to show all rows in the employee dataframe and only matching rows from the timesheet dataframe.
